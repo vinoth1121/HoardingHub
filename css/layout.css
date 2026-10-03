@@ -1,0 +1,591 @@
+/* HoardingHub — layout layer.
+   Structure, flow, rhythm, breakpoints. No literal colours: every value
+   resolves through css/tokens.css. Widget skin lives in components.css. */
+
+/* === Shell === */
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-pad);
+}
+
+/* Anchored panels must clear the sticky nav. */
+#top,
+#estimator,
+#formats,
+#how-it-works,
+#faq,
+#book {
+  scroll-margin-top: calc(var(--nav-h) + var(--space-3));
+}
+
+/* === Grid system === */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--grid-gap);
+}
+
+/* Never let a grid child overflow its track. */
+.grid > *,
+.col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-12,
+.col-start-1, .col-start-2, .col-start-3, .col-start-4, .col-start-5,
+.col-start-6, .col-start-7, .col-start-8, .col-start-9,
+.col-end-3, .col-end-4, .col-end-5, .col-end-6, .col-end-7, .col-end-8,
+.col-end-9, .col-end-10, .col-end-11, .col-end-12, .col-end-13 {
+  min-width: 0;
+}
+
+@media (min-width: 40rem) {
+  /* Twelve columns, asymmetric by design: nothing centres by default. */
+  .grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  :where(.col-3) { grid-column: span 3; }
+  :where(.col-4) { grid-column: span 4; }
+  :where(.col-5) { grid-column: span 5; }
+  :where(.col-6) { grid-column: span 6; }
+  :where(.col-7) { grid-column: span 7; }
+  :where(.col-8) { grid-column: span 8; }
+  :where(.col-9) { grid-column: span 9; }
+  :where(.col-12) { grid-column: span 12; }
+
+  :where(.col-start-1) { grid-column-start: 1; }
+  :where(.col-start-2) { grid-column-start: 2; }
+  :where(.col-start-3) { grid-column-start: 3; }
+  :where(.col-start-4) { grid-column-start: 4; }
+  :where(.col-start-5) { grid-column-start: 5; }
+  :where(.col-start-6) { grid-column-start: 6; }
+  :where(.col-start-7) { grid-column-start: 7; }
+  :where(.col-start-8) { grid-column-start: 8; }
+  :where(.col-start-9) { grid-column-start: 9; }
+
+  :where(.col-end-3) { grid-column-end: 3; }
+  :where(.col-end-4) { grid-column-end: 4; }
+  :where(.col-end-5) { grid-column-end: 5; }
+  :where(.col-end-6) { grid-column-end: 6; }
+  :where(.col-end-7) { grid-column-end: 7; }
+  :where(.col-end-8) { grid-column-end: 8; }
+  :where(.col-end-9) { grid-column-end: 9; }
+  :where(.col-end-10) { grid-column-end: 10; }
+  :where(.col-end-11) { grid-column-end: 11; }
+  :where(.col-end-12) { grid-column-end: 12; }
+  :where(.col-end-13) { grid-column-end: 13; }
+}
+/* === Sticky header (positioning only) === */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  background: var(--nav-bg);
+  border-bottom: var(--border-w) solid var(--line);
+}
+
+.site-header.is-scrolled {
+  background: var(--nav-bg-scrolled);
+}
+
+.header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--nav-h);
+}
+
+.header-inner > * {
+  min-width: 0;
+}
+
+/* === Mobile drawer: off-canvas is the default, >= 64rem resets it inline === */
+#site-nav {
+  position: fixed;
+  inset-block-start: var(--nav-h);
+  inset-inline: 0;
+  z-index: var(--z-nav);
+  width: 100%;
+  max-height: calc(100vh - var(--nav-h));
+  max-height: calc(100dvh - var(--nav-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  background: var(--paper);
+  border-bottom: var(--border-w) solid var(--line);
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease),
+    visibility var(--dur) var(--ease);
+}
+
+#site-nav.is-open {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* Scroll lock while the sheet owns the viewport. */
+body.nav-open {
+  overflow: hidden;
+}
+
+/* Scrim: below the drawer, above page content. Created by JS. */
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-nav) - 1);
+  background: color-mix(in srgb, var(--ink) 45%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-scrim.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-scrim[hidden] {
+  display: none;
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-list > li {
+  width: 100%;
+  min-width: 0;
+}
+
+.nav-list a {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-target);
+  padding-inline: var(--gutter);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+#nav-toggle {
+  display: inline-flex;
+}
+
+@media (min-width: 64rem) {
+  /* id-qualified so component rules cannot re-hide the inline nav. */
+  #site-nav[id] {
+    position: static;
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    max-height: none;
+    overflow: visible;
+    width: auto;
+    background: transparent;
+    border-bottom: 0;
+  }
+
+  #nav-toggle[id] {
+    display: none;
+  }
+
+  .nav-list {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+    width: auto;
+  }
+
+  .nav-list > li {
+    width: auto;
+  }
+
+  .nav-list a {
+    min-height: auto;
+    padding-inline: 0;
+    border-bottom: 0;
+  }
+}
+
+/* === Ticker === */
+.ticker {
+  overflow: hidden;
+  white-space: nowrap;
+  border-block: var(--border-w) solid var(--line);
+  background: var(--accent);
+  color: var(--on-accent);
+  padding-block: .4rem;
+  user-select: none;
+}
+
+.ticker-track {
+  display: inline-flex;
+  gap: 0;
+  animation: hh-ticker var(--ticker-speed) linear infinite;
+  will-change: transform;
+}
+
+.ticker-track > span {
+  display: inline-block;
+  padding-right: 2rem;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+/* Two identical spans render in index.html, so -50% loops seamlessly. */
+@keyframes hh-ticker {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* === Hero === */
+.hero {
+  position: relative;
+  background: var(--paper);
+  padding-block: 0 var(--section-pad);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--stack-gap);
+  padding-inline: 0;
+  padding-block-start: var(--space-5);
+}
+
+/* The hero shell runs edge-to-edge on mobile; the type keeps its own gutter
+   so nothing touches the screen edge. Both drop it once the shell has one. */
+.hero-copy,
+.hero-poster {
+  min-width: 0;
+  padding-inline: var(--gutter);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+}
+
+.hero-poster {
+  position: relative;
+  max-width: 34rem;
+  margin-inline-start: auto;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--grid-gap);
+  margin-block-start: var(--space-5);
+}
+
+.hero-stat,
+.hero-stats > div,
+.hero-stat dd {
+  min-width: 0;
+}
+
+.hero-stat dd {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 40rem) {
+  .hero {
+    padding-block-end: var(--section-pad);
+  }
+
+  /* Hero shell only gains gutters from 40rem; edge-to-edge below it. */
+  .hero-grid {
+    padding-inline: var(--gutter);
+  }
+
+  .hero-copy,
+  .hero-poster {
+    padding-inline: 0;
+  }
+}
+
+@media (min-width: 64rem) {
+  .hero {
+    padding-block-end: var(--section-pad-lg);
+  }
+
+  .hero-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: center;
+    gap: var(--grid-gap);
+  }
+
+  /* Deliberate 7 / 5 with a dead column: the poster never hugs the edge. */
+  .hero-copy {
+    grid-column: 1 / 8;
+  }
+
+  .hero-poster {
+    grid-column: 9 / 13;
+    transform: rotate(-1.5deg);
+    margin-block-start: var(--space-5);
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* === Section grounds: stacked printed panels, not a uniform feed === */
+.estimator,
+.steps-section,
+.booking {
+  background: var(--surface-sunken);
+}
+
+.formats,
+.faq {
+  background: var(--paper);
+}
+
+/* Offset stack of pasted posters, clipped so nothing scrolls sideways. */
+.formats {
+  overflow: clip;
+}
+
+.site-footer {
+  background: var(--surface-sunken);
+  padding-block: var(--space-5);
+}
+
+/* === Section heads: left-anchored, measure-capped === */
+.section-head {
+  max-width: calc(var(--measure) + var(--space-6));
+  margin-block-end: var(--stack-gap);
+}
+/* === Estimator: 5 / 7, results sticky on wide viewports only === */
+.estimator-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--stack-gap);
+}
+
+.estimator-form,
+.estimator-results {
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .estimator-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--grid-gap);
+  }
+
+  .estimator-form {
+    grid-column: 1 / 6;
+  }
+
+  .estimator-results {
+    grid-column: 7 / 13;
+    position: sticky;
+    top: calc(var(--nav-h) + var(--space-3));
+  }
+}
+
+/* === Formats === */
+.formats-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.format-card {
+  min-width: 0;
+}
+
+.format-illustration {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin-block-end: var(--space-3);
+}
+
+@media (min-width: 40rem) {
+  .formats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .section {
+    padding-block: var(--section-pad-lg);
+  }
+
+  .formats {
+    padding-block-end: calc(var(--section-pad-lg) + var(--space-5) + var(--space-3));
+  }
+
+  .formats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  /* Staggered baseline, like sheets pasted slightly off-square. */
+  .format-card:nth-child(1) { transform: translateY(0); }
+  .format-card:nth-child(2) { transform: translateY(1.5rem); }
+  .format-card:nth-child(3) { transform: translateY(3rem); }
+}
+
+/* === Steps === */
+.steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .steps {
+    position: relative;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--grid-gap);
+    padding-block-start: var(--space-5);
+  }
+
+  /* Connector rule running behind the numerals. */
+  .steps::before {
+    content: "";
+    position: absolute;
+    inset-block-start: calc(var(--space-5) + var(--space-3));
+    inset-inline: 0;
+    border-top: var(--border-w) solid var(--line-soft);
+  }
+
+  .step {
+    position: relative;
+  }
+}
+
+/* === FAQ: single column, hard measure cap === */
+.faq-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  max-width: var(--measure);
+}
+
+.faq-item,
+.faq-trigger,
+.faq-panel p {
+  min-width: 0;
+}
+
+.faq-trigger,
+.faq-panel p {
+  max-width: var(--measure);
+}
+
+/* === Booking: 7 / 5, form left, aside right === */
+.booking-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--stack-gap);
+}
+
+.booking-form,
+.booking-aside {
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .booking-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--grid-gap);
+  }
+
+  .booking-form {
+    grid-column: 1 / 8;
+  }
+
+  .booking-aside {
+    grid-column: 9 / 13;
+  }
+}
+
+/* === Footer === */
+.footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.footer-grid > * {
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .site-footer {
+    padding-block: var(--section-pad-lg);
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-5) var(--grid-gap);
+  }
+}
+
+/* === Very wide: the shell stops growing, the rhythm opens up === */
+@media (min-width: 90rem) {
+  .section {
+    padding-block: calc(var(--section-pad-lg) + var(--space-5));
+  }
+
+  .hero {
+    padding-block-end: calc(var(--section-pad-lg) + var(--space-5));
+  }
+
+  .formats {
+    padding-block-end: calc(var(--section-pad-lg) + var(--space-6) + var(--space-3));
+  }
+
+  .site-footer {
+    padding-block: calc(var(--section-pad-lg) + var(--space-5));
+  }
+}
+
+/* === Reduced motion: nothing unguarded === */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+    will-change: auto;
+  }
+
+  #site-nav {
+    transition: none;
+  }
+}
