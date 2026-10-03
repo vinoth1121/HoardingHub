@@ -1,0 +1,123 @@
+/* Design tokens — the only file in this project allowed to contain literal colours. */
+
+:root {
+  /* === Ground & ink === */
+  --paper: #F4EFE3;
+  --paper-raised: #FBF8EF;
+  --paper-sunk: #E7E0CE;
+  --ink: #111111;
+  --ink-soft: #4B473C;
+  --paper-soft: #EDE6D5;
+
+  /* === Hazard accent + the single stamp red === */
+  --accent: #FFD400;
+  --accent-deep: #E0B400;
+  --on-accent: #111111;
+  --stamp: #C42B1C;
+
+  /* === Rules & hard shadows (zero blur) === */
+  --line: #111111;
+  --line-soft: #1111112E;
+  --shadow-hard: 6px 6px 0 var(--line);
+  --shadow-hard-sm: 4px 4px 0 var(--line);
+  --shadow-stamp: 4px 4px 0 var(--stamp);
+
+  /* === Type === */
+  --font-display: 'Anton', 'Arial Narrow', 'Haettenschweiler', Impact, sans-serif;
+  --font-body: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --step--1: clamp(.78rem, .74rem + .2vw, .86rem);
+  --step-0: clamp(1rem, .95rem + .25vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1rem + .5vw, 1.45rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.2vw, 2rem);
+  --step-3: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+  --step-4: clamp(2.75rem, 1.3rem + 7vw, 5.5rem);
+  --step-5: clamp(3.25rem, .5rem + 12vw, 9.5rem);
+
+  /* === Measure === */
+  --gutter: clamp(1rem, .55rem + 2.2vw, 2.5rem);
+  --maxw: 84rem;
+  --nav-h: 4.25rem;
+  --measure: 36rem;
+
+  /* === Shape, motion, focus === */
+  --radius: 0;
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --ease: cubic-bezier(.2, .7, .3, 1);
+  --border-w: 3px;
+  --focus-ring: 3px solid var(--accent);
+
+  /* === Spacing scale === */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  /* === Surfaces (derived; each degrades to a plain value without color-mix) === */
+  --surface-card: var(--paper-raised);
+  --surface-card: color-mix(in srgb, var(--paper-raised) 92%, var(--paper));
+  --surface-sunken: var(--paper-sunk);
+  --surface-sunken: color-mix(in srgb, var(--paper-sunk) 88%, var(--paper));
+  --nav-bg: var(--paper);
+  --nav-bg: color-mix(in srgb, var(--paper) 88%, transparent);
+  --nav-bg-scrolled: var(--paper);
+  --nav-bg-scrolled: color-mix(in srgb, var(--paper) 97%, transparent);
+
+  /* === Rhythm === */
+  --grid-gap: clamp(1rem, .65rem + 1.5vw, 1.75rem);
+  --stack-gap: clamp(1.5rem, 1.1rem + 1.4vw, 2.5rem);
+  --section-pad: var(--space-5);
+  --section-pad-lg: var(--space-6);
+  --field-pad-y: .65rem;
+  --field-pad-x: .8rem;
+
+  /* === Layers & hit targets === */
+  --z-nav: 50;
+  --z-skip: 100;
+  --tap-target: 2.75rem;
+
+  /* === Motion objects === */
+  --ticker-speed: 28s;
+  --stamp-rotate: -6deg;
+
+  /* === Paper texture (alpha-only ink, degrades to --line-soft) === */
+  --grain-a: var(--line-soft);
+  --grain-a: color-mix(in srgb, var(--ink) 5%, transparent);
+  --grain-b: var(--line-soft);
+  --grain-b: color-mix(in srgb, var(--ink) 3%, transparent);
+
+  /* === Night-billboard glow (text-shadow only) === */
+  --glow: none;
+  --glow-strong: none;
+}
+
+[data-theme="dark"] {
+  /* === Ground & ink === */
+  --paper: #0A0A0A;
+  --paper-raised: #141414;
+  --paper-sunk: #000000;
+  --ink: #FFF4CE;
+  --ink-soft: #C9C2AE;
+  --paper-soft: #1E1E1E;
+
+  /* === Hazard accent + the single stamp red === */
+  --accent: #FFD400;
+  --accent-deep: #FFD400;
+  --on-accent: #0A0A0A;
+  --stamp: #FF4A34;
+
+  /* === Rules & hard shadows (zero blur) === */
+  --line: #FFD400;
+  --line-soft: #FFD40038;
+  --shadow-hard: 6px 6px 0 #FFD4005C;
+  --shadow-hard-sm: 4px 4px 0 #FFD4005C;
+  --shadow-stamp: 4px 4px 0 #FF4A34A6;
+
+  /* === Night-billboard glow: text-shadow, the one place blur is allowed === */
+  --glow: 0 0 2px var(--accent), 0 0 16px var(--accent-deep);
+  --glow: 0 0 2px var(--accent), 0 0 16px color-mix(in srgb, var(--accent) 60%, transparent);
+  --glow-strong: 0 0 3px var(--accent), 0 0 26px var(--accent-deep);
+  --glow-strong: 0 0 3px var(--accent), 0 0 26px color-mix(in srgb, var(--accent) 85%, transparent);
+}
