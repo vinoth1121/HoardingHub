@@ -23,3 +23,8 @@ lighthouse-report*.html
 
 # ---- Scratch files --------------------------------------------------------
 *.tmp
+
+# Local agent tooling — not part of this project
+.claude/
+.agent/
+.agents/
