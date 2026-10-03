@@ -9,7 +9,10 @@
 <title>HoardingHub — Book hoardings, shelters &amp; DOOH screens</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
 <script>try{var t=localStorage.getItem('hh-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body>
@@ -123,7 +126,7 @@
           </div>
           <div class="field">
             <label for="budget">Budget</label>
-            <output id="budget-out" for="budget">₹4,00,000</output>
+            <output id="budget-out" for="budget">₹5,00,000</output>
             <input id="budget" type="range" name="budget" min="5000" max="5000000" step="5000" value="500000">
             <input id="budget-exact" type="number" name="budget_exact" min="5000" max="5000000" step="5000" value="500000" aria-label="Exact budget in rupees">
           </div>
@@ -133,20 +136,20 @@
         <div id="estimator-results" class="estimator-results" aria-live="polite" aria-atomic="true">
           <div class="result-block result-block--total">
             <p class="result-label">Estimated campaign cost</p>
-            <p id="out-total" class="result-value">₹74,900</p>
+            <p id="out-total" class="result-value">₹75,000</p>
             <p id="out-daily" class="result-sub">₹2,500 / day · 30 days</p>
           </div>
           <div class="result-block">
             <p class="result-label">Estimated daily impressions</p>
-            <p id="out-impressions" class="result-value">38,700 – 83,000</p>
+            <p id="out-impressions" class="result-value">1,19,175 – 2,56,500</p>
           </div>
           <div class="result-block">
             <p class="result-label">Sites your budget buys</p>
-            <p id="out-sites" class="result-value">2</p>
+            <p id="out-sites" class="result-value">28</p>
           </div>
           <div class="result-block">
             <p class="result-label">Effective CPM</p>
-            <p id="out-cpm" class="result-value">₹194</p>
+            <p id="out-cpm" class="result-value">₹63</p>
           </div>
           <div id="out-warnings" class="result-warnings" aria-live="polite"></div>
           <div class="result-actions">
