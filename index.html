@@ -87,6 +87,196 @@
         <p class="stamp stamp--hero">LIVE RATES</p>
       </div>
     </div>
+  </section>  <section id="estimator" class="section estimator" aria-labelledby="estimator-title">
+    <div class="container">
+      <header class="section-head">
+        <p class="section-index">01 / ESTIMATOR</p>
+        <h2 id="estimator-title">Price the campaign before the call</h2>
+        <p>Three inputs, one number. The estimator runs against the 2026 rate card our sales desk quotes from, so what you see is what gets invoiced — media cost only.</p>
+      </header>
+      <div class="estimator-grid">
+        <form id="estimator-form" class="estimator-form" novalidate>
+          <fieldset class="field-group">
+            <legend class="visually-hidden" id="city-legend">City</legend>
+            <div id="city-group" class="chip-set" role="radiogroup" aria-labelledby="city-legend">
+              <label class="chip"><input type="radio" name="city" value="chennai">Chennai</label>
+              <label class="chip"><input type="radio" name="city" value="mumbai" checked>Mumbai</label>
+              <label class="chip"><input type="radio" name="city" value="delhi">Delhi</label>
+              <label class="chip"><input type="radio" name="city" value="bengaluru">Bengaluru</label>
+              <label class="chip"><input type="radio" name="city" value="hyderabad">Hyderabad</label>
+              <label class="chip"><input type="radio" name="city" value="kolkata">Kolkata</label>
+            </div>
+          </fieldset>
+          <fieldset class="field-group">
+            <legend class="visually-hidden" id="format-legend">Format</legend>
+            <div id="format-group" class="chip-set" role="radiogroup" aria-labelledby="format-legend">
+              <label class="chip"><input type="radio" name="format" value="hoarding" checked>Hoarding</label>
+              <label class="chip"><input type="radio" name="format" value="bus-shelter">Bus shelter</label>
+              <label class="chip"><input type="radio" name="format" value="digital-screen">Digital screen</label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="duration">Run length</label>
+            <output id="duration-out" for="duration">30 days</output>
+            <input id="duration" type="range" name="duration" min="7" max="90" step="1" value="30">
+            <div class="range-scale"><span>7 days</span><span>90 days</span></div>
+          </div>
+          <div class="field">
+            <label for="budget">Budget</label>
+            <output id="budget-out" for="budget">₹4,00,000</output>
+            <input id="budget" type="range" name="budget" min="5000" max="5000000" step="5000" value="500000">
+            <input id="budget-exact" type="number" name="budget_exact" min="5000" max="5000000" step="5000" value="500000" aria-label="Exact budget in rupees">
+          </div>
+          <p class="note">Rates are illustrative and derived from a fictional rate card.</p>
+          <button type="submit" class="visually-hidden">Recalculate estimate</button>
+        </form>
+        <div id="estimator-results" class="estimator-results" aria-live="polite" aria-atomic="true">
+          <div class="result-block result-block--total">
+            <p class="result-label">Estimated campaign cost</p>
+            <p id="out-total" class="result-value">₹74,900</p>
+            <p id="out-daily" class="result-sub">₹2,500 / day · 30 days</p>
+          </div>
+          <div class="result-block">
+            <p class="result-label">Estimated daily impressions</p>
+            <p id="out-impressions" class="result-value">38,700 – 83,000</p>
+          </div>
+          <div class="result-block">
+            <p class="result-label">Sites your budget buys</p>
+            <p id="out-sites" class="result-value">2</p>
+          </div>
+          <div class="result-block">
+            <p class="result-label">Effective CPM</p>
+            <p id="out-cpm" class="result-value">₹194</p>
+          </div>
+          <div id="out-warnings" class="result-warnings" aria-live="polite"></div>
+          <div class="result-actions">
+            <a id="out-cta" class="btn btn-primary" href="#book">Book this plan</a>
+            <button id="share-btn" class="btn btn-ghost" type="button">Copy shareable link</button>
+          </div>
+          <p id="out-note" class="note">Illustrative rates. GST and artwork charges extra.</p>
+        </div>
+      </div>
+    </div>
+  </section>  <section id="formats" class="section formats" aria-labelledby="formats-title">
+    <div class="container">
+      <header class="section-head">
+        <p class="section-index">02 / FORMATS</p>
+        <h2 id="formats-title">Three ways to be unavoidable</h2>
+        <p>Every number below is straight off the 2026 rate card, per unit, per day. The estimator uses the same figures, so a price you build here matches a quote you get from us.</p>
+      </header>
+      <div class="formats-grid">
+        <article class="format-card" data-format="hoarding">
+          <div class="format-illustration">
+            <svg class="art art--hoarding" viewBox="0 0 320 200" role="img" focusable="false">
+              <title>A painted truss hoarding on steel legs, with a maintenance ladder and two flood lamp heads over the panel</title>
+              <g stroke="var(--ink,#111)" stroke-width="5" fill="none"><path d="M96 152v38M224 152v38M110 152l24 38M210 152l-24 38"/></g>
+              <rect x="52" y="36" width="216" height="118" fill="var(--accent,#FFD400)" stroke="var(--ink,#111)" stroke-width="5"/>
+              <rect x="66" y="50" width="188" height="90" fill="none" stroke="var(--ink,#111)" stroke-width="3" stroke-dasharray="12 7"/>
+              <g fill="var(--ink,#111)"><rect x="80" y="62" width="16" height="66"/><rect x="104" y="62" width="9" height="66"/><rect x="121" y="62" width="16" height="66"/><rect x="145" y="62" width="9" height="66"/><rect x="162" y="62" width="16" height="66"/></g>
+              <rect x="196" y="62" width="44" height="34" fill="var(--stamp,#C42B1C)"/>
+              <rect x="196" y="104" width="30" height="8" fill="var(--ink,#111)" opacity=".55"/>
+              <rect x="196" y="118" width="44" height="8" fill="var(--ink,#111)" opacity=".55"/>
+              <g stroke="var(--ink,#111)" stroke-width="3" fill="none"><path d="M234 154v46M246 154v46"/><path d="M234 162h12M234 172h12M234 182h12M234 192h12"/></g>
+              <g stroke="var(--ink,#111)" stroke-width="4" fill="var(--ink,#111)"><path d="M78 36V24M242 36V24"/><rect x="64" y="12" width="28" height="12"/><rect x="228" y="12" width="28" height="12"/></g>
+              <g stroke="var(--ink,#111)" stroke-width="2" opacity=".35"><path d="M70 28L46 42M84 28l24 14M234 28l-24 14M250 28l24 14"/></g>
+            </svg>
+          </div>
+          <p class="format-kicker">STATIC</p>
+          <h3 class="format-name">Hoarding</h3>
+          <p class="format-blurb">The classic unipole and truss board. Painted, pasted or lit, it sits long enough that people read it twice — which is exactly why recall campaigns still start here.</p>
+          <ul class="format-specs">
+            <li><strong>Rate</strong> ₹1,850 per hoarding per day</li>
+            <li><strong>Reach</strong> 42,000–90,000 impressions/day</li>
+            <li><strong>Best for</strong> Brand recall, launch campaigns</li>
+          </ul>
+          <button class="format-pick btn btn-ghost" type="button" data-format="hoarding">Price this format →</button>
+        </article>
+        <article class="format-card" data-format="bus-shelter">
+          <div class="format-illustration">
+            <svg class="art art--shelter" viewBox="0 0 320 200" role="img" focusable="false">
+              <title>A bus shelter in side elevation: roof slab, lit ad panel with a route-number strip, a bench, a bin and a street tree</title>
+              <rect x="0" y="176" width="320" height="24" fill="var(--ink,#111)" opacity=".12"/>
+              <rect x="283" y="118" width="8" height="58" fill="var(--ink,#111)"/>
+              <g fill="var(--ink,#111)" opacity=".85"><circle cx="287" cy="98" r="26"/><circle cx="263" cy="116" r="15"/><circle cx="309" cy="118" r="13"/></g>
+              <rect x="64" y="34" width="196" height="16" fill="var(--ink,#111)"/>
+              <rect x="70" y="50" width="8" height="126" fill="var(--ink,#111)"/>
+              <rect x="244" y="50" width="8" height="126" fill="var(--ink,#111)"/>
+              <rect x="88" y="56" width="124" height="76" fill="var(--accent,#FFD400)" stroke="var(--ink,#111)" stroke-width="4"/>
+              <rect x="96" y="66" width="88" height="10" fill="var(--ink,#111)"/>
+              <rect x="96" y="84" width="108" height="8" fill="var(--ink,#111)" opacity=".6"/>
+              <rect x="96" y="100" width="76" height="8" fill="var(--ink,#111)" opacity=".6"/>
+              <rect x="96" y="116" width="94" height="8" fill="var(--ink,#111)" opacity=".35"/>
+              <rect x="88" y="138" width="124" height="14" fill="var(--ink,#111)"/>
+              <text x="150" y="149" text-anchor="middle" font-family="Anton, Arial Narrow, sans-serif" font-size="11" fill="var(--paper,#F4EFE3)">402</text>
+              <g fill="var(--ink,#111)"><rect x="216" y="138" width="24" height="6"/><rect x="216" y="150" width="24" height="6"/><rect x="218" y="128" width="4" height="48"/><rect x="234" y="128" width="4" height="48"/></g>
+              <rect x="16" y="132" width="22" height="44" fill="var(--ink,#111)"/>
+              <rect x="12" y="124" width="30" height="9" fill="var(--stamp,#C42B1C)"/>
+            </svg>
+          </div>
+          <p class="format-kicker">STREET FURNITURE</p>
+          <h3 class="format-name">Bus shelter</h3>
+          <p class="format-blurb">An eight-sheet nobody walks past, at eye level, next to where people wait. Cheapest reach per rupee in the book, and the fastest to approve.</p>
+          <ul class="format-specs">
+            <li><strong>Rate</strong> ₹620 per shelter per day</li>
+            <li><strong>Reach</strong> 18,000–45,000 impressions/day</li>
+            <li><strong>Best for</strong> Walk-in traffic, hyperlocal offers</li>
+          </ul>
+          <button class="format-pick btn btn-ghost" type="button" data-format="bus-shelter">Price this format →</button>
+        </article>
+        <article class="format-card" data-format="digital-screen">
+          <div class="format-illustration">
+            <svg class="art art--digital" viewBox="0 0 320 200" role="img" focusable="false">
+              <title>A tall LED totem glowing hazard-yellow on a pavement, throwing straight rays of light, watched by two pedestrians</title>
+              <rect x="0" y="176" width="320" height="24" fill="var(--ink,#111)" opacity=".12"/>
+              <g stroke="var(--accent,#FFD400)" stroke-width="5" fill="none"><path d="M120 32L86 12"/><path d="M112 62L60 54"/><path d="M108 94L56 98"/><path d="M200 32l34-20"/><path d="M208 62l52-8"/><path d="M212 94l52 4"/></g>
+              <rect x="112" y="24" width="96" height="88" fill="var(--ink,#111)"/>
+              <rect x="118" y="30" width="84" height="76" fill="var(--accent,#FFD400)"/>
+              <rect x="126" y="38" width="68" height="8" fill="var(--ink,#111)"/>
+              <path d="M150 58l28 20-28 20z" fill="var(--ink,#111)"/>
+              <rect x="126" y="106" width="46" height="8" fill="var(--ink,#111)" opacity=".55"/>
+              <rect x="150" y="112" width="22" height="64" fill="var(--ink,#111)"/>
+              <rect x="132" y="172" width="56" height="10" fill="var(--ink,#111)"/>
+              <g fill="var(--ink,#111)" opacity=".9"><circle cx="88" cy="120" r="9"/><path d="M80 130h16l6 46H74z"/></g>
+              <g fill="var(--ink,#111)" opacity=".5"><circle cx="240" cy="124" r="8"/><path d="M232 132h16l5 44h-26z"/></g>
+            </svg>
+          </div>
+          <p class="format-kicker">LED · DOOH</p>
+          <h3 class="format-name">Digital screen</h3>
+          <p class="format-blurb">Day-parted video, live counters and retargeting loops on a totem you can swap in an evening. Goes live 48 hours from artwork approval.</p>
+          <ul class="format-specs">
+            <li><strong>Rate</strong> ₹1,150 per screen per day</li>
+            <li><strong>Reach</strong> 60,000–180,000 impressions/day</li>
+            <li><strong>Best for</strong> Day-parting, video, retargeting loops</li>
+          </ul>
+          <button class="format-pick btn btn-ghost" type="button" data-format="digital-screen">Price this format →</button>
+        </article>
+      </div>
+    </div>
+  </section>  <section id="how-it-works" class="section steps-section" aria-labelledby="how-title">
+    <div class="container">
+      <header class="section-head">
+        <p class="section-index">03 / HOW IT WORKS</p>
+        <h2 id="how-title">Three steps, one working day</h2>
+        <p>No discovery call, no three-week proposal. You price it yourself, we map it in a day, and the crew hoists it.</p>
+      </header>
+      <ol class="steps">
+        <li class="step step--accent">
+          <span class="step-num" aria-hidden="true">01</span>
+          <h3>Pick your wall.</h3>
+          <p>Choose a city, a format and a run length. The estimator prices it live, in rupees, off our rate card — not off a sales call.</p>
+        </li>
+        <li class="step">
+          <span class="step-num" aria-hidden="true">02</span>
+          <h3>We map the sites.</h3>
+          <p>Within one working day you get a location map: photos, weekday footfall, the nearest competitor boards and a firm all-in quote.</p>
+        </li>
+        <li class="step">
+          <span class="step-num" aria-hidden="true">03</span>
+          <h3>Hoist and report.</h3>
+          <p>Our licensed team pastes, climbs and lights it. Then weekly eyeball photos and footfall-vs-plan numbers land in your inbox.</p>
+        </li>
+      </ol>
+    </div>
   </section></main>
 <footer class="site-footer">
   <div class="container footer-grid">
