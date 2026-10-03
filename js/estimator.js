@@ -333,3 +333,327 @@ export function formatCount(n) {
   const v = toFiniteNumber(n);
   return v === null ? '0' : countFormatter.format(v);
 }
+/* ================================================================== *
+ * 2 / UI BINDING
+ *
+ * `initEstimator()` is the only thing in this file that touches the DOM.
+ * It owns the inputs, mirrors state into the query string, and paints text.
+ * It never computes anything itself — every figure comes from the pure
+ * core above. Nothing here runs at import time.
+ * ================================================================== */
+
+/** Defaults matching the pre-checked radios in index.html. */
+const DEFAULT_CITY = 'mumbai';
+const DEFAULT_FORMAT = 'hoarding';
+
+const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+const ANIMATION_MS = 420;
+const SHARE_FLASH_MS = 2_000;
+
+/** Returned when the estimator markup is not on the page. */
+const NOOP = Object.freeze({
+  getState: () => null,
+  setState() {},
+  recalc: () => null,
+  destroy() {},
+});
+
+/**
+ * Wire the estimator form to the quote engine.
+ *
+ * @param {{ document?: Document, window?: Window }} [deps]
+ * @returns {{ getState: () => object|null, setState: (patch: object) => void, recalc: () => object|null, destroy: () => void }}
+ */
+export function initEstimator(deps = {}) {
+  const doc = deps.document ?? globalThis.document;
+  const win = deps.window ?? globalThis.window;
+  if (!doc || !win) return NOOP;
+
+  const byId = (id) => doc.getElementById(id);
+  const form = byId('estimator-form');
+  if (!form) return NOOP;
+
+  const out = {
+    total: byId('out-total'),
+    daily: byId('out-daily'),
+    impressions: byId('out-impressions'),
+    sites: byId('out-sites'),
+    cpm: byId('out-cpm'),
+    warnings: byId('out-warnings'),
+    note: byId('out-note'),
+    duration: byId('duration-out'),
+    budget: byId('budget-out'),
+  };
+  const durationInput = byId('duration');
+  const budgetRange = byId('budget');
+  const budgetExact = byId('budget-exact');
+  const shareBtn = byId('share-btn');
+  const estimator = byId('estimator');
+  const cityRadios = Array.from(form.querySelectorAll('input[name="city"]'));
+  const formatRadios = Array.from(form.querySelectorAll('input[name="format"]'));
+  const pickButtons = Array.from(doc.querySelectorAll('.format-pick'));
+
+  // Seed from ?city=&format=&days=&budget=, falling back to the clamp defaults.
+  const params = new URLSearchParams(win.location?.search ?? '');
+  const firstNumber = (...keys) => {
+    for (const key of keys) {
+      const raw = params.get(key);
+      if (raw === null) continue;
+      const trimmed = raw.trim();
+      if (trimmed === '') continue;
+      const parsed = Number(trimmed);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
+  };
+  const state = {
+    city: CITY_IDS.includes(params.get('city')) ? params.get('city') : DEFAULT_CITY,
+    format: FORMAT_IDS.includes(params.get('format')) ? params.get('format') : DEFAULT_FORMAT,
+    duration: clampDuration(firstNumber('days', 'duration')),
+    budget: clampBudget(firstNumber('budget')),
+  };
+
+  let motionQuery = null;
+  try {
+    motionQuery = typeof win.matchMedia === 'function' ? win.matchMedia(REDUCED_MOTION) : null;
+  } catch {
+    motionQuery = null;
+  }
+  const prefersReducedMotion = () => motionQuery?.matches === true;
+
+  const frames = new Map();      // element -> in-flight rAF id
+  const lastNumbers = new Map();  // element -> last number painted
+  let instant = false;           // force a no-animation repaint
+  let flashTimer = null;
+  let destroyed = false;
+
+  const cancelAnimations = () => {
+    for (const frame of frames.values()) win.cancelAnimationFrame(frame);
+    frames.clear();
+  };
+
+  /** Count a number up to `to` over ~420ms with an ease-out curve. */
+  function animateNumber(el, from, to, formatter) {
+    if (!el) return;
+    const running = frames.get(el);
+    if (running !== undefined) {
+      win.cancelAnimationFrame(running);
+      frames.delete(el);
+    }
+    if (instant || prefersReducedMotion() || from === to || typeof win.requestAnimationFrame !== 'function') {
+      el.textContent = formatter(to);
+      return;
+    }
+    const started = typeof win.performance?.now === 'function' ? win.performance.now() : 0;
+    const tick = (stamp) => {
+      const progress = Math.min(1, Math.max(0, (stamp - started) / ANIMATION_MS));
+      const eased = 1 - (1 - progress) ** 3;
+      el.textContent = formatter(Math.round(from + (to - from) * eased));
+      if (progress < 1) {
+        frames.set(el, win.requestAnimationFrame(tick));
+      } else {
+        frames.delete(el);
+        el.textContent = formatter(to);
+      }
+    };
+    frames.set(el, win.requestAnimationFrame(tick));
+  }
+
+  /** Paint a number, animating from whatever was there before. */
+  function paintNumber(el, value, formatter) {
+    if (!el) return;
+    const from = lastNumbers.has(el) ? lastNumbers.get(el) : value;
+    lastNumbers.set(el, value);
+    animateNumber(el, from, value, formatter);
+  }
+
+  function paintWarnings(warnings) {
+    if (!out.warnings) return;
+    out.warnings.textContent = '';
+    for (const warning of warnings) {
+      const line = doc.createElement('p');
+      line.className = `warning warning--${warning.level}`;
+      line.textContent = warning.message;
+      out.warnings.appendChild(line);
+    }
+  }
+
+  function paint(quote) {
+    paintNumber(out.total, quote.totalCost, formatINR);
+    paintNumber(out.cpm, quote.effectiveCpm, formatINR);
+    paintNumber(out.sites, quote.sitesAffordable, String);
+    if (out.daily) out.daily.textContent = `${formatINR(quote.dailyRate)} / day · ${quote.duration} days`;
+    if (out.impressions) out.impressions.textContent = `${formatCount(quote.impressions.low)} – ${formatCount(quote.impressions.high)}`;
+    if (out.duration) out.duration.textContent = `${quote.duration} days`;
+    if (out.budget) out.budget.textContent = formatINR(quote.budget);
+    if (out.note) out.note.textContent = `Rate card ${RATE_CARD_VERSION} · illustrative media cost only. GST and artwork extra.`;
+    paintWarnings(quote.warnings);
+  }
+
+  /** Push state back into the controls. `skipExact` avoids fighting the caret. */
+  function syncControls({ skipExact = false } = {}) {
+    for (const radio of cityRadios) radio.checked = radio.value === state.city;
+    for (const radio of formatRadios) radio.checked = radio.value === state.format;
+    if (durationInput) durationInput.value = String(state.duration);
+    if (budgetRange) budgetRange.value = String(state.budget);
+    if (budgetExact && !skipExact) budgetExact.value = String(state.budget);
+  }
+
+  /** Shareable state in the address bar, without adding a history entry. */
+  function syncUrl() {
+    const history = win.history;
+    if (!history || typeof history.replaceState !== 'function') return;
+    const query = `?city=${encodeURIComponent(state.city)}&format=${encodeURIComponent(state.format)}&days=${state.duration}&budget=${state.budget}`;
+    try {
+      history.replaceState(history.state, '', `${win.location?.pathname ?? ''}${query}${win.location?.hash ?? ''}`);
+    } catch {
+      // Sandboxed frames and some file:// setups refuse; the estimate still stands.
+    }
+  }
+
+  function recalc() {
+    if (destroyed) return null;
+    const quote = calculateQuote(state);
+    paint(quote);
+    syncUrl();
+    return quote;
+  }
+
+  function onControlInput(event) {
+    const target = event.target;
+    const name = target?.name;
+    if (name === 'city' && CITY_IDS.includes(target.value)) state.city = target.value;
+    else if (name === 'format' && FORMAT_IDS.includes(target.value)) state.format = target.value;
+    else if (name === 'duration') state.duration = clampDuration(target.value);
+    else if (name === 'budget' || name === 'budget_exact') state.budget = clampBudget(target.value);
+    else return;
+    syncControls({ skipExact: name === 'budget_exact' });
+    recalc();
+  }
+
+  function onSubmit(event) {
+    event.preventDefault();
+    syncControls();
+    recalc();
+  }
+
+  /** `.format-pick` in the format gallery jumps to the estimator with that format. */
+  function onPickFormat(event) {
+    const id = event.currentTarget?.dataset?.format;
+    if (!FORMAT_IDS.includes(id)) return;
+    state.format = id;
+    syncControls();
+    recalc();
+    if (estimator && typeof estimator.scrollIntoView === 'function') {
+      estimator.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+
+  function flashShare(message, restore) {
+    if (!shareBtn) return;
+    if (shareBtn.offsetWidth) shareBtn.style.minWidth = `${shareBtn.offsetWidth}px`;
+    shareBtn.textContent = message;
+    if (flashTimer !== null) win.clearTimeout(flashTimer);
+    flashTimer = win.setTimeout(() => {
+      flashTimer = null;
+      shareBtn.textContent = restore;
+      shareBtn.style.minWidth = '';
+    }, SHARE_FLASH_MS);
+  }
+
+  async function copyViaClipboard(text) {
+    const clipboard = win.navigator?.clipboard;
+    if (!win.isSecureContext || !clipboard || typeof clipboard.writeText !== 'function') return false;
+    await clipboard.writeText(text);
+    return true;
+  }
+
+  function copyViaTextarea(text) {
+    const area = doc.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.top = '-1000px';
+    area.style.opacity = '0';
+    doc.body?.appendChild(area);
+    area.select();
+    let copied = false;
+    try {
+      copied = typeof doc.execCommand === 'function' && doc.execCommand('copy');
+    } catch {
+      copied = false;
+    }
+    area.remove();
+    return copied;
+  }
+
+  async function onShare() {
+    const label = shareBtn?.textContent ?? 'Copy shareable link';
+    const url = win.location?.href ?? '';
+    let copied = false;
+    try {
+      copied = await copyViaClipboard(url);
+    } catch {
+      copied = false;
+    }
+    if (!copied) {
+      try {
+        copied = copyViaTextarea(url);
+      } catch {
+        copied = false;
+      }
+    }
+    flashShare(copied ? 'Link copied' : 'Copy failed — link is in your address bar', label);
+  }
+
+  /** Toggling the OS motion setting must take effect without a reload. */
+  function onMotionChange() {
+    cancelAnimations();
+    instant = true;
+    recalc();
+    instant = false;
+  }
+
+  form.addEventListener('input', onControlInput);
+  form.addEventListener('change', onControlInput);
+  form.addEventListener('submit', onSubmit);
+  for (const button of pickButtons) button.addEventListener('click', onPickFormat);
+  shareBtn?.addEventListener('click', onShare);
+  if (motionQuery && typeof motionQuery.addEventListener === 'function') {
+    motionQuery.addEventListener('change', onMotionChange);
+  }
+
+  syncControls();
+  paint(calculateQuote(state));
+
+  return Object.freeze({
+    getState: () => ({ ...state }),
+    setState(patch) {
+      if (!patch || typeof patch !== 'object' || destroyed) return;
+      if (CITY_IDS.includes(patch.city)) state.city = patch.city;
+      if (FORMAT_IDS.includes(patch.format)) state.format = patch.format;
+      if (patch.duration !== undefined) state.duration = clampDuration(patch.duration);
+      if (patch.budget !== undefined) state.budget = clampBudget(patch.budget);
+      syncControls();
+      recalc();
+    },
+    recalc,
+    destroy() {
+      destroyed = true;
+      cancelAnimations();
+      if (flashTimer !== null) {
+        win.clearTimeout(flashTimer);
+        flashTimer = null;
+      }
+      form.removeEventListener('input', onControlInput);
+      form.removeEventListener('change', onControlInput);
+      form.removeEventListener('submit', onSubmit);
+      for (const button of pickButtons) button.removeEventListener('click', onPickFormat);
+      shareBtn?.removeEventListener('click', onShare);
+      if (motionQuery && typeof motionQuery.removeEventListener === 'function') {
+        motionQuery.removeEventListener('change', onMotionChange);
+      }
+      lastNumbers.clear();
+    },
+  });
+}
