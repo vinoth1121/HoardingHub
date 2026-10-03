@@ -1,0 +1,849 @@
+/* HoardingHub - components layer: widget skin only.
+   Loaded last, so it wins on equal specificity for the SKIN.
+   Structure, rhythm, breakpoints, header/drawer/ticker POSITIONING and the
+   `.steps::before` connector rule live in layout.css; element defaults, the
+   reset, focus rings, `[hidden]`, `.visually-hidden`, `.container`, `.section`
+   and the reduced-motion guard live in base.css.
+   No literal colour here: every value resolves through css/tokens.css.
+   No border-radius, no filter, no blurred box-shadow, no !important. */
+
+/* === Brand === */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  background: var(--accent);
+  border: var(--border-w) solid var(--line);
+  transform: rotate(-5deg);
+}
+
+/* The tile is the mark; the glyph plate sits inside it. */
+.brand-mark svg {
+  width: 68%;
+  height: 68%;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-1);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -.01em;
+}
+
+.site-footer .brand-mark { width: 2.1rem; height: 2.1rem; }
+.site-footer .brand-name { font-size: var(--step-2); }
+
+/* === Theme toggle === */
+.theme-toggle {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-2);
+  background: var(--paper-raised);
+  border: var(--border-w) solid var(--line);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.theme-toggle-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.theme-toggle-icon svg { width: 100%; height: 100%; }
+
+/* JS swaps both the attribute and the class - honour either. */
+.theme-toggle[aria-pressed="true"],
+.theme-toggle.is-night {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* === Mobile drawer trigger === */
+.nav-toggle {
+  -webkit-appearance: none;
+  appearance: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  padding: 0;
+  background: var(--paper-raised);
+  border: var(--border-w) solid var(--line);
+  color: var(--ink);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+/* Three flat bars, drawn from the token rule colour. */
+.nav-toggle-bars {
+  display: grid;
+  gap: 4px;
+  width: 1.15rem;
+}
+
+.nav-toggle-bars > span {
+  display: block;
+  height: 3px;
+  background: var(--ink);
+}
+
+.nav-toggle[aria-expanded="true"] { background: var(--accent); }
+
+/* === Nav links === */
+.nav-list a:not(.btn) {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  text-decoration-color: transparent;
+  transition: text-decoration-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.nav-list a:not(.btn):hover { text-decoration-color: currentColor; }
+
+@media (min-width: 64rem) {
+  /* Desktop only: the yellow chip is padded AND pulled back by the same
+     amount, so the inline row never reflows. Below 64rem layout.css gives
+     these links gutter padding and the chip would visibly shift the text. */
+  .nav-list a:not(.btn):hover,
+  .nav-list a:not(.btn):focus-visible {
+    padding-inline: .35rem;
+    margin-inline: -.35rem;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+}
+
+/* layout.css puts gutter padding and a hairline bottom rule on every
+   `.nav-list a`; the CTA also carries `.btn`, so restore button metrics
+   (specificity 0,2,1 beats this file 0,1,0 and layout.css 0,1,1). */
+.nav-list a.btn {
+  padding: .6rem 1rem;
+  border: var(--border-w) solid var(--line);
+  min-height: var(--tap-target);
+}
+
+/* === Buttons === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  font-size: var(--step-0);
+  line-height: 1;
+  padding: .85rem 1.4rem;
+  border: var(--border-w) solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  min-height: var(--tap-target);
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-hard);
+}
+
+.btn-ghost {
+  background: transparent;
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.btn-sm {
+  padding: .6rem 1rem;
+  font-size: var(--step--1);
+}
+
+/* Physical press: the plate lifts 2px and the shadow grows to compensate. */
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--line);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--line);
+}
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--shadow-hard-sm);
+}
+
+/* Buttons are parts of the poster, not browser chrome. */
+.btn,
+.format-pick,
+.faq-trigger,
+.nav-toggle,
+.theme-toggle {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* === Kickers, labels and prose === */
+.kicker,
+.format-kicker,
+.result-sub,
+.form-fineprint,
+.footer-fineprint,
+.note {
+  font-size: var(--step--1);
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* Anton carries no bold weight - 600 would be synthesised. */
+.kicker,
+.format-kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+}
+
+.kicker { margin-block-end: var(--space-3); }
+
+.lede {
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
+  color: var(--ink-soft);
+}
+
+/* `.note` is prose in this markup (rate-card disclaimers), so it stays
+   sentence case and readable - only the condensed kickers go uppercase. */
+.note {
+  margin: 0;
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+
+.result-sub { margin: 0; }
+
+.form-fineprint {
+  margin: var(--space-3) 0 0;
+  max-width: var(--measure);
+}
+
+.footer-fineprint {
+  margin: var(--space-1) 0 0;
+  max-width: var(--measure);
+}
+
+/* === Stamp === */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  letter-spacing: .08em;
+  color: var(--stamp);
+  border: 2px solid var(--stamp);
+  padding: .35rem .6rem;
+  transform: rotate(var(--stamp-rotate));
+  box-shadow: var(--shadow-stamp);
+  background: transparent;
+}
+
+/* === Hero === */
+.hero-title {
+  font-size: var(--step-5);
+  line-height: .86;
+  text-transform: uppercase;
+  letter-spacing: -.015em;
+}
+
+/* Forward-compatible line wrappers: index.html currently ships the headline
+   as one text node, so only `.hero-title` paints until the markup splits. */
+.hero-title-line { display: block; }
+
+.hero-title-line--accent {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: .1em .25em .05em;
+  transform: rotate(0deg);
+  box-shadow: var(--shadow-hard);
+}
+
+@media (min-width: 40rem) {
+  /* Rotate only where there is room; below that the block would clip. */
+  .hero-title-line--accent { transform: rotate(-1.2deg); }
+}
+
+[data-theme="dark"] .hero-title-line--accent { text-shadow: var(--glow); }
+
+.hero-poster {
+  display: block;
+  background: var(--paper-raised);
+  border: var(--border-w) solid var(--line);
+  box-shadow: var(--shadow-hard);
+  padding: var(--space-3);
+}
+
+.hero-poster .stamp {
+  margin-block-start: var(--space-3);
+  margin-block-end: 0;
+}
+
+.hero-stat dt {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink-soft);
+}
+
+.hero-stat dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline dividers between the four proof points. The grid is two-up below
+   64rem and four-up above it (layout.css), so odd cells drop the rule. */
+.hero-stat {
+  border-inline-start: 1px solid var(--line-soft);
+  padding-inline-start: var(--space-3);
+}
+
+.hero-stat:nth-child(2n + 1) {
+  border-inline-start: 0;
+  padding-inline-start: 0;
+}
+
+@media (min-width: 64rem) {
+  .hero-stat:nth-child(2n + 1) {
+    border-inline-start: 1px solid var(--line-soft);
+    padding-inline-start: var(--space-3);
+  }
+
+  .hero-stat:first-child {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+}
+
+/* === Section heads === */
+.section-index {
+  display: inline-block;
+  margin: 0 0 var(--space-2);
+  padding-block-end: .2rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: var(--border-w) solid var(--line);
+}
+
+.section-head h2 { margin-block-start: var(--space-3); }
+
+.section-head > p { max-width: var(--measure); }
+
+/* === Format cards === */
+.format-card {
+  background: var(--surface-card);
+  border: var(--border-w) solid var(--line);
+  box-shadow: var(--shadow-hard);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+/* Hover recolours the edge - the sheet never lifts off the wall. */
+.format-card:hover,
+.format-card:focus-within { border-color: var(--stamp); }
+
+.format-name {
+  margin: 0;
+  font-size: var(--step-2);
+}
+
+.format-blurb {
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--ink-soft);
+}
+
+/* Leader-dot spec sheet, like a printed rate card. */
+.format-specs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: .5rem;
+}
+
+.format-specs li {
+  margin: 0;
+  border-bottom: 1px dashed var(--line-soft);
+  padding-block-end: .35rem;
+}
+
+.format-specs strong {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--stamp);
+}
+
+.format-pick {
+  margin-top: auto;
+  width: 100%;
+}
+
+/* === Steps === */
+/* layout.css anchors the `.steps::before` connector at space-5 + space-3
+   (1rem below the top of each `.step`), so 1.5rem of padding-block-start
+   drops the numeral boxes below that rule with half a rem of clean air. */
+.step { padding-block-start: var(--space-4); }
+
+.step--accent {
+  border-inline-start: var(--border-w) solid var(--accent);
+  padding-inline-start: var(--space-3);
+}
+
+/* Yellow plate behind near-black numerals: `--accent` type on cream is 1.09:1
+   and fails outright, and `--ink` inverts to cream in the night theme
+   (1.30:1 on yellow), so the plate carries the contrast in both themes. */
+.step-num {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 var(--space-2);
+  padding: .05em .16em .1em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(4rem, 12vw, 9rem);
+  line-height: .8;
+  letter-spacing: -.02em;
+  color: var(--on-accent);
+  background: var(--accent);
+  -webkit-text-stroke: 0;
+  text-shadow: 4px 4px 0 var(--line);
+}
+
+/* Night billboard: on black paper the plate is redundant, so the numeral is
+   plain glowing hazard yellow - 13.8:1, no plate, no muddy shadow. */
+[data-theme="dark"] .step-num {
+  background: none;
+  color: var(--accent);
+  text-shadow: var(--glow-strong);
+}
+
+.step h3 { margin: 0 0 var(--space-2); }
+
+.step p {
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--ink-soft);
+}
+
+/* === FAQ === */
+/* A ruled ledger: the list gap goes to zero so item rules meet as one line. */
+.faq-list { gap: 0; }
+
+.faq-item {
+  min-width: 0;
+  border-bottom: var(--border-w) solid var(--line);
+}
+
+.faq-item:first-child {
+  border-top: var(--border-w) solid var(--line);
+}
+
+.faq-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  margin: 0;
+  padding-block: var(--space-4);
+  padding-inline: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-1);
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--ink);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.faq-trigger:hover { color: var(--stamp); }
+
+/* Chevron from two borders only - no icon font, no SVG file, no arrow glyph. */
+.faq-trigger::after {
+  content: "";
+  flex: none;
+  width: .7rem;
+  height: .7rem;
+  margin-inline-end: .4rem;
+  border: var(--border-w) solid currentColor;
+  border-inline-end: 0;
+  border-block-start: 0;
+  transform: rotate(45deg);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.faq-trigger[aria-expanded="true"]::after { transform: rotate(225deg); }
+
+/* Same value base.css already declares - this only keeps the attribute
+   authoritative here, since no rule below re-declares display. */
+.faq-panel[hidden] { display: none; }
+
+.faq-panel p {
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
+  color: var(--ink-soft);
+}
+
+/* `hidden` owns the height, so opening only fades: no height jump and no
+   display fighting the attribute. The trigger sits inside an h3, so the
+   expanded state has to be read upward through :has(). */
+.faq-item:has(.faq-trigger[aria-expanded="true"]) .faq-panel {
+  animation: hh-faq-open var(--dur) var(--ease) both;
+}
+
+@keyframes hh-faq-open {
+  from { opacity: 0; transform: translateY(-.4rem); }
+  to { opacity: 1; transform: none; }
+}
+
+/* === Estimator form === */
+.estimator-form fieldset.field-group {
+  border: 0;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+}
+
+/* Legends stay .visually-hidden - base.css owns that clip. */
+
+.chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target);
+  padding: .55rem .9rem;
+  border: var(--border-w) solid var(--line);
+  background: var(--paper-raised);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+/* Hidden but focusable and clickable across the whole chip. */
+.chip input {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.chip:has(input:checked) {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.chip:has(input:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  margin-block-end: var(--space-4);
+}
+
+/* Markup puts `<output>` beside the label, not inside it, so the pair shares
+   a grid row and the value sits hard right. */
+.field > label {
+  grid-column: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-block-end: .5rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.field > output {
+  grid-column: 2;
+  justify-self: end;
+  margin-block-end: .5rem;
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.field > :not(label):not(output) {
+  grid-column: 1 / -1;
+}
+
+.range-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+  margin-block-start: .35rem;
+}
+
+/* === Estimator results === */
+.estimator-results {
+  background: var(--paper-raised);
+  border: var(--border-w) solid var(--line);
+  box-shadow: var(--shadow-hard);
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The night-mode yellow edge is the `--line` / `--shadow-hard` token pair
+   resolving to hazard yellow - no filter, no second colour. */
+.result-block + .result-block {
+  border-block-start: 1px solid var(--line-soft);
+  padding-block-start: var(--space-3);
+}
+
+.result-label {
+  margin: 0 0 .25rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-soft);
+}
+
+.result-value {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* The big yellow number is the hero of the estimator. */
+.result-block--total .result-value {
+  display: inline-block;
+  padding: .05em .3em .1em;
+  font-size: var(--step-4);
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.result-warnings:empty { display: none; }
+
+/* Warning text stays in --ink: only the leading rule carries severity. */
+.warning {
+  margin: 0 0 .5rem;
+  padding: .6rem .75rem;
+  border-inline-start: var(--border-w) solid var(--stamp);
+  background: var(--paper-sunk);
+  font-size: var(--step--1);
+  color: var(--ink);
+}
+
+.warning--error { border-inline-start-color: var(--stamp); }
+.warning--warn { border-inline-start-color: var(--accent-deep); }
+.warning--info { border-inline-start-color: var(--ink-soft); }
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* === Booking form === */
+.error {
+  margin-block-start: .4rem;
+  margin-block-end: 0;
+  padding: .4rem .6rem;
+  border-inline-start: var(--border-w) solid var(--stamp);
+  background: var(--paper-sunk);
+  font-size: var(--step--1);
+  color: var(--ink);
+}
+
+.field.is-invalid input,
+.field.is-invalid select,
+.field.is-invalid textarea {
+  border-color: var(--stamp);
+  box-shadow: 3px 3px 0 var(--stamp);
+}
+
+#bf-message {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.form-status {
+  margin: 0;
+  font-size: var(--step--1);
+}
+
+.form-success {
+  border: var(--border-w) solid var(--line);
+  box-shadow: var(--shadow-hard-sm);
+  padding: var(--space-4);
+  background: var(--paper-sunk);
+}
+
+/* Yellow proof-of-print tab on the success card. */
+.form-success::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 1.1rem;
+  margin-block-end: var(--space-3);
+  background: var(--accent);
+  border: var(--border-w) solid var(--line);
+}
+
+.booking-aside {
+  border-block-start: var(--border-w) solid var(--line);
+  padding-block-start: var(--space-4);
+}
+
+.booking-aside ul,
+.aside-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: .5rem;
+}
+
+.aside-list li {
+  margin: 0;
+  border-bottom: 1px dashed var(--line-soft);
+  padding-block-end: .35rem;
+}
+
+.booking-aside .stamp {
+  margin-block-start: var(--space-3);
+  margin-block-end: 0;
+}
+
+/* === Footer === */
+.site-footer {
+  background: var(--paper-sunk);
+  border-block-start: var(--border-w) solid var(--line);
+}
+
+/* Row gap stays generous; the inline axis uses the grid token, matching the
+   two-value declaration layout.css already makes at 64rem. */
+.footer-grid {
+  gap: var(--space-4) var(--grid-gap);
+}
+
+.site-footer nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.site-footer nav a {
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.copyright {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step--1);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.footer-colophon {
+  border-top: 1px dashed var(--line-soft);
+  padding-block-start: var(--space-3);
+}
