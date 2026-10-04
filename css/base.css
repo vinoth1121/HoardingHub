@@ -124,6 +124,8 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
+  min-height: 1.75rem;
+  margin-block: -9px;
   padding: 0;
   border: 0;
   background: transparent;

@@ -9,11 +9,11 @@
   --ink-soft: #4B473C;
   --paper-soft: #EDE6D5;
 
-  /* === Hazard accent + the single stamp red === */
+  /* === Hazard accent + the single stamp red (AA body text on --paper-soft and --paper-sunk) === */
   --accent: #FFD400;
   --accent-deep: #E0B400;
   --on-accent: #111111;
-  --stamp: #C42B1C;
+  --stamp: #AC1E12;
 
   /* === Rules & hard shadows (zero blur) === */
   --line: #111111;
