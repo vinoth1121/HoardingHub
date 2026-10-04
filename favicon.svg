@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+<title>HoardingHub</title>
+<rect width="64" height="64" fill="#111111"/>
+<path fill="#FFD400" d="M8 10h48v26H8zM16 36h8v22h-8zM40 36h8v22h-8zM16 44h32v6H16z"/>
+<rect x="18" y="18" width="28" height="10" fill="#111111"/>
+</svg>
