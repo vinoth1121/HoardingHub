@@ -294,12 +294,17 @@
   letter-spacing: -.015em;
 }
 
-/* Forward-compatible line wrappers: index.html currently ships the headline
-   as one text node, so only `.hero-title` paints until the markup splits. */
+/* Line wrappers stack as block boxes, so consecutive lines can never collide
+   no matter how many of them the headline is split into. The accent plate keeps
+   fit-content so it still hugs its own words, and its block margins give the
+   6px hard shadow room above and below. */
 .hero-title-line { display: block; }
 
 .hero-title-line--accent {
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin-block-start: .1em;
+  margin-block-end: .8rem;
   background: var(--accent);
   color: var(--on-accent);
   padding: .1em .25em .05em;
