@@ -28,3 +28,4 @@ lighthouse-report*.html
 .claude/
 .agent/
 .agents/
+.kilo/
