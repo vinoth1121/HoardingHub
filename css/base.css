@@ -125,7 +125,7 @@ input[type="range"] {
   appearance: none;
   width: 100%;
   min-height: 1.75rem;
-  margin-block: -9px;
+  margin-block: 0;
   padding: 0;
   border: 0;
   background: transparent;
