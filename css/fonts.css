@@ -1,0 +1,135 @@
+/* ============================================================================
+   Self-hosted webfonts. DO NOT MOVE THESE BACK TO THE GOOGLE FONTS CDN.
+
+   Measured before this file existed, every load paid a render-blocking
+   third-party round trip: index.html -> fonts.googleapis.com/css2 (827ms
+   wasted) -> fonts.gstatic.com -> woff2. First Contentful Paint and Largest
+   Contentful Paint landed on exactly the same number (2984ms mobile, 1931ms
+   desktop) because both were gated on that one chain, and the "Web font"
+   swap on .hero-title-line--accent accounted for 0.128 mobile / 0.110
+   desktop of Cumulative Layout Shift. The four woff2 files total ~124 KiB, so
+   weight was never the problem - the connection was. Serving the bytes from
+   this origin and preloading the two latin subsets from index.html removes the
+   third round trip entirely. Re-adding the <link> to fonts.googleapis.com
+   would put the whole chain straight back, so don't.
+
+   Only the subsets this page can render are shipped. latin-ext is not
+   optional: the rupee sign U+20B9 sits in the latin-ext range (U+20AD-20C0),
+   not in latin, and it appears in every price on the page - drop latin-ext
+   and every amount renders as tofu.
+
+   The declarations below are Google's own css2 output, copied verbatim
+   (font-weight, font-style, font-stretch, unicode-range) with the gstatic
+   URLs rewritten to relative paths.
+   ============================================================================ */
+
+/* Anton - display face, single weight. latin-ext carries U+20B9 (INR). */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/anton-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/anton-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* IBM Plex Sans - body face, variable: one file serves the whole weight
+   range the page uses (400 body, 500 numerals, 600 kickers and strong). */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('../assets/fonts/ibm-plex-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('../assets/fonts/ibm-plex-sans-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ============================================================================
+   Metric-compatible fallbacks for the swap window.
+
+   font-display:swap paints these families while the woff2 files are still in
+   flight, so the fallback has to arrive at the webfont's metrics or the swap
+   moves the layout - which is exactly what the .hero-title-line--accent shift
+   above was. Unadjusted, plain Arial Narrow gives the display type a 115px
+   line box where Anton's is 151px at a 100px font, and the headline reflows
+   from one line into two at 1280px: 68.8px of headline height and 110.6px of
+   accent-plate width, which is what Lighthouse was scoring as CLS.
+
+   Each rule is declared under the fallback family that --font-display /
+   --font-body already name, NOT under a dedicated name like "Anton Fallback":
+   a @font-face is only ever used when some font-family list asks for it, those
+   lists live in css/tokens.css, so renaming these faces after a family nothing
+   references would quietly turn them into dead CSS.
+
+   Every number below was measured, not estimated - read out of Chrome at a
+   1000px em against these same woff2 files, then re-measured to confirm.
+
+   Anton needs a big correction because it is far more condensed than its
+   fallback: raw Arial Narrow sets an average 10% wider than Anton once spaces
+   are counted, which is what tips the headline onto a second line. It is
+   solved on "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG" because this face
+   only ever renders uppercase (every --font-display rule sets
+   text-transform: uppercase) and word spacing is a large share of a short
+   poster line. Averaging a glyph table instead - caps and digits, no spaces -
+   leaves the headline 8.6% wide and still reflowing; this lands it inside 4.6%
+   and it holds to one line.
+
+   IBM Plex Sans needs almost none: Segoe UI is already within a couple of
+   percent of it across this page's prose, so the scaling is set to 101%. That
+   number is deliberately under a cliff - at 101.6% and above the .lede grows
+   an extra wrapped line (33.6px) and everything under it moves with it. Do
+   not raise it. Falling short of the webfont's width is safe; overshooting it
+   is what moves layout.
+
+   Both fallbacks reproduce the webfont line box exactly: 151px for Anton and
+   131px for IBM Plex Sans at a 100px font, 27px and 23px at 18px, where the
+   raw fallbacks gave 115px and 133px.
+
+   Anton's ascent-override exceeds 100% because size-adjust pulls the em down
+   to 84.987% while Anton's own ascent is a tall 117.6% of em; the two multiply
+   back to 117.6%, which is the point of the pair.
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Arial Narrow';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Arial Narrow');
+  size-adjust: 84.987%;
+  ascent-override: 138.374%;
+  descent-override: 38.712%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Segoe UI';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: local('Segoe UI');
+  size-adjust: 101%;
+  ascent-override: 101.548%;
+  descent-override: 27.290%;
+  line-gap-override: 0%;
+}
