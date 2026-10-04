@@ -363,6 +363,11 @@ const NOOP = Object.freeze({
  *
  * @param {{ document?: Document, window?: Window }} [deps]
  * @returns {{ getState: () => object|null, setState: (patch: object) => void, recalc: () => object|null, destroy: () => void }}
+ *   The query string is kept in step with the controls by replaceState, so
+ *   recalculating never adds a history entry. Picking a format from the
+ *   gallery is the one exception: it deep-links, pushing #estimator so the
+ *   jump is a real navigation - shareable, bookmarkable, back-button
+ *   navigable - like every other in-page anchor on the site.
  */
 export function initEstimator(deps = {}) {
   const doc = deps.document ?? globalThis.document;
@@ -537,13 +542,37 @@ export function initEstimator(deps = {}) {
     recalc();
   }
 
-  /** `.format-pick` in the format gallery jumps to the estimator with that format. */
+  /**
+   * Make the gallery-to-estimator jump a real navigation. pushState, not a
+   * bare location.hash assignment: the hash setter would push an entry of its
+   * own, scroll on its own, and can fight the query string that syncUrl has
+   * already serialised. Called after recalc, so the
+   * ?city=&format=&days=&budget= pair in the URL is carried over untouched
+   * and the hash sits alongside it. pushState never scrolls, so the caller
+   * still scrolls exactly once.
+   */
+  function deepLinkEstimator() {
+    const history = win.history;
+    if (!history || typeof history.pushState !== 'function') return;
+    const target = `${win.location?.pathname ?? ''}${win.location?.search ?? ''}#estimator`;
+    try {
+      history.pushState(history.state, '', target);
+    } catch {
+      // Sandboxed frames and some file:// setups refuse; the scroll still lands.
+    }
+  }
+
+  /**
+   * A `.format-pick` in the format gallery jumps to the estimator with that format:
+   * set it, recalculate, deep-link to #estimator, then scroll to it.
+   */
   function onPickFormat(event) {
     const id = event.currentTarget?.dataset?.format;
     if (!FORMAT_IDS.includes(id)) return;
     state.format = id;
     syncControls();
     recalc();
+    deepLinkEstimator();
     if (estimator && typeof estimator.scrollIntoView === 'function') {
       estimator.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
     }
