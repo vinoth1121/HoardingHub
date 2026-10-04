@@ -2,14 +2,20 @@
  * HoardingHub — sticky header and the mobile nav drawer.
  *
  * Owns the scroll state on #site-header plus the off-canvas sheet: scrim,
- * focus trap, Esc, inert-when-closed and the desktop reset at 64rem. Nothing
- * runs at import time and no transition is added in JS.
+ * focus trap, Esc, inert-when-closed and the desktop reset at 64rem. Focus
+ * moves into the sheet only once the sheet can take it, because visibility
+ * transitions in CSS and a visibility:hidden subtree refuses focus.
+ * Nothing runs at import time and no transition is added in JS.
  */
 
 const DESKTOP_QUERY = '(min-width: 64rem)';
 const SCROLL_PX = 8;
 const FOCUSABLE = 'a[href], button, [tabindex]:not([tabindex="-1"])';
 const SUPPORTS_INERT = typeof HTMLElement !== 'undefined' && 'inert' in HTMLElement.prototype;
+
+/** --dur in css/layout.css is 220ms. This outlasts it, so the safety net still
+ *  lands when reduced motion skips the transition entirely. */
+const FOCUS_FALLBACK_MS = 260;
 
 /** Returned when the drawer markup is not on the page. */
 const NOOP = Object.freeze({ open() {}, close() {}, toggle() {}, destroy() {}, isOpen: () => false });
@@ -41,6 +47,14 @@ export function initNav(deps = {}) {
   let muted = new Set();
   let frame = null;
   let desktop = null;
+  let destroyed = false;
+  let navHadTabindex = false;
+  // Deferred focus: the handles to cancel, plus the token that says whether a
+  // scheduled focus still belongs to the drawer that is open right now.
+  let focusFrame = null;
+  let focusTimer = null;
+  let focusOnEnd = null;
+  let focusTicket = 0;
 
   try {
     desktop = typeof win.matchMedia === 'function' ? win.matchMedia(DESKTOP_QUERY) : null;
@@ -163,9 +177,92 @@ export function initNav(deps = {}) {
     toggle?.setAttribute('aria-label', expanded ? 'Close menu' : 'Open menu');
   }
 
+  /** Release the deferred-focus handles without invalidating the token. */
+  function clearFocusHandles() {
+    if (focusFrame !== null && typeof win.cancelAnimationFrame === 'function') win.cancelAnimationFrame(focusFrame);
+    focusFrame = null;
+    if (focusTimer !== null) win.clearTimeout(focusTimer);
+    focusTimer = null;
+    if (focusOnEnd !== null) {
+      nav.removeEventListener('transitionend', focusOnEnd);
+      focusOnEnd = null;
+    }
+  }
+
+  /**
+   * Drop the focus still in flight and invalidate it. Every open and every
+   * close bumps the token, so a deferral made for an earlier drawer can never
+   * land on the page that has moved on: a fast Escape cannot have focus stolen
+   * back out of the toggle it just restored focus to.
+   */
+  function cancelPendingFocus() {
+    focusTicket += 1;
+    clearFocusHandles();
+  }
+
+  /** True once the sheet can take focus at all: not hidden, not display:none. */
+  function drawerIsFocusable() {
+    if (typeof win.getComputedStyle !== 'function') return true;
+    try {
+      const style = win.getComputedStyle(nav);
+      return style.visibility !== 'hidden' && style.display !== 'none';
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * Put focus on the first link in the sheet, falling back to the sheet itself
+   * so an open can never leave focus stranded outside the drawer. final forces
+   * the attempt even if the sheet still reports itself hidden, which is the
+   * timeout path rather than the transition one.
+   */
+  function attemptFocus(ticket, final) {
+    if (ticket !== focusTicket || destroyed || !state.open) return;
+    // Not focusable yet, so leave the timeout and the transitionend armed.
+    if (!final && !drawerIsFocusable()) return;
+    clearFocusHandles();
+    const items = focusables();
+    // items[0] is the toggle when there is one, so the first LINK is items[1];
+    // without a toggle the list is links only and the first one is items[0].
+    const target = (toggle ? items[1] : items[0]) ?? nav;
+    if (typeof target?.focus === 'function') target.focus();
+    if (!nav.contains(doc.activeElement) && typeof nav.focus === 'function') nav.focus();
+  }
+
+  /**
+   * Focus has to wait for the sheet to be focusable. css/layout.css transitions
+   * visibility over --dur, so in the same task that adds is-open the computed
+   * value is still hidden and the browser discards a synchronous focus(). Three
+   * paths race and the first one to find the sheet focusable wins: a double rAF
+   * (one frame to start the transition, one for the style to resolve), the
+   * visibility transition ending, and a timeout longer than the transition for
+   * the reduced-motion case, where no transition runs at all.
+   */
+  function scheduleFocus() {
+    cancelPendingFocus();
+    const ticket = focusTicket;
+    if (typeof win.setTimeout === 'function') {
+      focusTimer = win.setTimeout(() => {
+        focusTimer = null;
+        attemptFocus(ticket, true);
+      }, FOCUS_FALLBACK_MS);
+    }
+    focusOnEnd = (event) => {
+      if (event.target !== nav || event.propertyName !== 'visibility') return;
+      attemptFocus(ticket, false);
+    };
+    nav.addEventListener('transitionend', focusOnEnd);
+    if (typeof win.requestAnimationFrame !== 'function') return;
+    focusFrame = win.requestAnimationFrame(() => {
+      focusFrame = win.requestAnimationFrame(() => attemptFocus(ticket, false));
+    });
+  }
+
   /**
    * Open: reveal the sheet, lock scroll, flip the aria surface, raise the
-   * scrim, make the links reachable and move focus onto the first one.
+   * scrim, make the links reachable and schedule focus onto the first one.
+   * The focus call is deferred rather than synchronous; see scheduleFocus.
    */
   function open() {
     if (state.open) return;
@@ -176,8 +273,7 @@ export function initNav(deps = {}) {
     setScrim(true);
     syncHiddenState();
     doc.addEventListener('keydown', onKeydown);
-    const items = focusables();
-    (items[1] ?? items[0])?.focus();
+    scheduleFocus();
   }
 
   /**
@@ -188,6 +284,8 @@ export function initNav(deps = {}) {
   function close(options = {}) {
     const wasOpen = state.open;
     state.open = false;
+    // A pending open-focus must never fire into a drawer that has just shut.
+    cancelPendingFocus();
     nav.classList.remove('is-open');
     body?.classList.remove('nav-open');
     setToggleState(false);
@@ -205,6 +303,10 @@ export function initNav(deps = {}) {
   if (desktop && typeof desktop.addEventListener === 'function') {
     desktop.addEventListener('change', onViewportChange);
   }
+  // A programmatic focus target for the sheet itself, so an open can never
+  // leave focus outside the drawer. destroy() takes it away again.
+  navHadTabindex = nav.hasAttribute('tabindex');
+  if (!navHadTabindex) nav.setAttribute('tabindex', '-1');
   syncHiddenState();
   onScroll();
 
@@ -217,7 +319,9 @@ export function initNav(deps = {}) {
       return state.open;
     },
     destroy() {
+      destroyed = true;
       close({ restoreFocus: false });
+      cancelPendingFocus();
       toggle?.removeEventListener('click', onToggleClick);
       nav.removeEventListener('click', onNavClick);
       scrim?.removeEventListener('click', onScrimClick);
@@ -233,6 +337,7 @@ export function initNav(deps = {}) {
       muted = new Set();
       nav.removeAttribute('inert');
       nav.removeAttribute('aria-hidden');
+      if (!navHadTabindex) nav.removeAttribute('tabindex');
       header?.classList.remove('is-scrolled');
       scrim?.remove();
       scrim = null;
